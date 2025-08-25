@@ -1,0 +1,5 @@
+[workspace]
+members = [
+    "src/decentralized_university_backend"
+]
+resolver = "2"

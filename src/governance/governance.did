@@ -1,0 +1,110 @@
+type ApiError = variant {
+  NotFound: text;
+  Unauthorized;
+  InvalidInput: text;
+  InternalError: text;
+  AlreadyExists: text;
+  InsufficientPermissions;
+  QuotaExceeded;
+};
+
+type CreateProposalRequest = record {
+  title: text;
+  description: text;
+  proposal_type: ProposalType;
+  voting_duration_days: nat64;
+};
+
+type GovernanceConfig = record {
+  minimum_proposal_threshold: nat64;
+  minimum_voting_threshold: nat64;
+  voting_period_days: nat64;
+  execution_delay_days: nat64;
+  proposal_fee: nat64;
+};
+
+type GovernanceStats = record {
+  total_proposals: nat64;
+  active_proposals: nat64;
+  executed_proposals: nat64;
+  total_votes: nat64;
+  governance_config: GovernanceConfig;
+};
+
+type Proposal = record {
+  id: nat64;
+  proposer_id: principal;
+  title: text;
+  description: text;
+  proposal_type: ProposalType;
+  status: ProposalStatus;
+  created_at: nat64;
+  voting_deadline: nat64;
+  execution_delay: nat64;
+  votes_for: nat64;
+  votes_against: nat64;
+  votes_abstain: nat64;
+  minimum_threshold: nat64;
+  executed_at: opt nat64;
+};
+
+type ProposalStatus = variant {
+  Active;
+  Passed;
+  Rejected;
+  Executed;
+  Expired;
+};
+
+type ProposalType = variant {
+  CourseApproval: record { course_id: text };
+  InstructorVerification: record { instructor_id: principal };
+  PlatformUpgrade: record { upgrade_details: text };
+  TokenomicsChange: record { change_details: text };
+  GovernanceParameter: record { parameter: text; new_value: text };
+};
+
+type Result = variant {
+  Ok: Proposal;
+  Err: ApiError;
+};
+
+type Result_1 = variant {
+  Ok: Vote;
+  Err: ApiError;
+};
+
+type Result_2 = variant {
+  Ok: bool;
+  Err: ApiError;
+};
+
+type Vote = record {
+  proposal_id: nat64;
+  voter_id: principal;
+  vote_type: VoteType;
+  voting_power: nat64;
+  timestamp: nat64;
+};
+
+type VoteType = variant {
+  For;
+  Against;
+  Abstain;
+};
+
+service : {
+  create_proposal: (CreateProposalRequest) -> (Result);
+  execute_proposal: (nat64) -> (Result_2);
+  get_active_proposals: (opt nat32) -> (vec Proposal) query;
+  get_governance_stats: () -> (GovernanceStats) query;
+  get_proposal: (nat64) -> (Result) query;
+  get_proposal_history: (opt ProposalStatus, opt nat32) -> (vec Proposal) query;
+  get_proposal_votes: (nat64) -> (vec Vote) query;
+  get_user_proposals: (principal) -> (vec Proposal) query;
+  get_user_vote: (nat64, principal) -> (opt Vote) query;
+  get_user_voting_power: (principal) -> (nat64) query;
+  update_governance_config: (GovernanceConfig) -> (Result_2);
+  update_user_voting_power: (principal, nat64) -> (Result_2);
+  vote_on_proposal: (nat64, VoteType) -> (Result_1);
+}

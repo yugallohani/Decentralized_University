@@ -1,0 +1,74 @@
+type Achievement = record {
+  id: text;
+  title: text;
+  description: text;
+  icon_url: opt text;
+  earned_at: nat64;
+};
+
+type ApiError = variant {
+  NotFound: text;
+  Unauthorized;
+  InvalidInput: text;
+  InternalError: text;
+  AlreadyExists: text;
+  InsufficientPermissions;
+  QuotaExceeded;
+};
+
+type CreateUserRequest = record {
+  username: text;
+  email: text;
+  full_name: text;
+  bio: opt text;
+  skills: vec text;
+};
+
+type Result = variant {
+  Ok: User;
+  Err: ApiError;
+};
+
+type Result_1 = variant {
+  Ok: User;
+  Err: ApiError;
+};
+
+type User = record {
+  id: principal;
+  username: text;
+  email: text;
+  full_name: text;
+  bio: opt text;
+  avatar_url: opt text;
+  role: UserRole;
+  created_at: nat64;
+  updated_at: nat64;
+  reputation_score: nat32;
+  skills: vec text;
+  achievements: vec Achievement;
+};
+
+type UserRole = variant {
+  Student;
+  Instructor;
+  Admin;
+  Moderator;
+};
+
+service : {
+  add_achievement: (principal, Achievement) -> (Result_1);
+  create_user: (CreateUserRequest) -> (Result);
+  get_current_user: () -> (Result_1) query;
+  get_leaderboard: (opt nat32) -> (vec User) query;
+  get_user: (principal) -> (Result_1) query;
+  get_user_by_username: (text) -> (Result_1) query;
+  get_user_count: () -> (nat64) query;
+  get_users_by_role: (UserRole) -> (vec User) query;
+  is_admin: (principal) -> (bool) query;
+  is_instructor: (principal) -> (bool) query;
+  search_users: (text, opt nat32) -> (vec User) query;
+  update_reputation_score: (principal, int32) -> (Result_1);
+  update_user_profile: (opt text, opt text, vec text) -> (Result_1);
+  update_user_role: (principal, UserRole) -> (Result_1);
+}

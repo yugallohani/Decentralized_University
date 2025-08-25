@@ -1,0 +1,67 @@
+type ApiError = variant {
+  NotFound: text;
+  Unauthorized;
+  InvalidInput: text;
+  InternalError: text;
+  AlreadyExists: text;
+  InsufficientPermissions;
+  QuotaExceeded;
+};
+
+type Certification = record {
+  id: text;
+  user_id: principal;
+  course_id: text;
+  title: text;
+  description: text;
+  issuer: text;
+  issued_at: nat64;
+  expires_at: opt nat64;
+  verification_hash: text;
+  metadata: CertificationMetadata;
+};
+
+type CertificationMetadata = record {
+  skills_acquired: vec text;
+  final_score: nat8;
+  completion_time_hours: nat32;
+  blockchain_proof: text;
+};
+
+type CertificationStats = record {
+  total_certifications: nat64;
+  most_common_skills: vec record { text; nat32 };
+  certifications_by_course: vec record { text; nat32 };
+};
+
+type Result = variant {
+  Ok: Certification;
+  Err: ApiError;
+};
+
+type Result_1 = variant {
+  Ok: bool;
+  Err: ApiError;
+};
+
+type UserCertificationSummary = record {
+  total_certifications: nat32;
+  unique_skills: vec text;
+  average_score: float32;
+  total_learning_hours: nat32;
+  most_recent_certification: opt Certification;
+};
+
+service : {
+  batch_issue_certifications: (vec record { principal; text }) -> (vec Result);
+  get_certification: (text) -> (Result) query;
+  get_certification_statistics: () -> (CertificationStats) query;
+  get_course_certifications: (text) -> (vec Certification) query;
+  get_user_certification_summary: (principal) -> (UserCertificationSummary) query;
+  get_user_certifications: (principal) -> (vec Certification) query;
+  get_user_certifications_for_course: (principal, text) -> (vec Certification) query;
+  issue_certification: (principal, text) -> (Result);
+  revoke_certification: (text) -> (Result_1);
+  search_certifications: (opt text, opt text, opt text, opt nat32) -> (vec Certification) query;
+  verify_certification: (text) -> (Result_1) query;
+}

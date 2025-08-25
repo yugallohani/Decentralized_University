@@ -1,13 +1,31 @@
 {
   "canisters": {
-    "decentralized_university_backend": {
-      "candid": "src/decentralized_university_backend/decentralized_university_backend.did",
-      "package": "decentralized_university_backend",
+    "user_management": {
+      "candid": "src/user_management/user_management.did",
+      "package": "user_management",
+      "type": "rust"
+    },
+    "course_management": {
+      "candid": "src/course_management/course_management.did",
+      "package": "course_management",
+      "type": "rust"
+    },
+    "certification_system": {
+      "candid": "src/certification_system/certification_system.did",
+      "package": "certification_system",
+      "type": "rust"
+    },
+    "governance": {
+      "candid": "src/governance/governance.did",
+      "package": "governance",
       "type": "rust"
     },
     "decentralized_university_frontend": {
       "dependencies": [
-        "decentralized_university_backend"
+        "user_management",
+        "course_management",
+        "certification_system",
+        "governance"
       ],
       "source": [
         "src/decentralized_university_frontend/dist"

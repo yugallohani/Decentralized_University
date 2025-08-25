@@ -1,0 +1,144 @@
+type ApiError = variant {
+  NotFound: text;
+  Unauthorized;
+  InvalidInput: text;
+  InternalError: text;
+  AlreadyExists: text;
+  InsufficientPermissions;
+  QuotaExceeded;
+};
+
+type AssignmentSubmission = record {
+  content: text;
+  submitted_at: nat64;
+  grade: opt nat8;
+  feedback: opt text;
+  graded_by: opt principal;
+};
+
+type ContentType = variant {
+  Video;
+  Text;
+  Audio;
+  Interactive;
+  Quiz;
+  Assignment;
+};
+
+type Course = record {
+  id: text;
+  title: text;
+  description: text;
+  instructor_id: principal;
+  category: text;
+  tags: vec text;
+  difficulty_level: DifficultyLevel;
+  estimated_duration_hours: nat32;
+  price: nat64;
+  is_published: bool;
+  created_at: nat64;
+  updated_at: nat64;
+};
+
+type CourseProgress = record {
+  completed_lessons: vec text;
+  quiz_scores: vec record { text; nat8 };
+  assignment_submissions: vec record { text; AssignmentSubmission };
+  time_spent_minutes: nat32;
+};
+
+type CreateCourseRequest = record {
+  title: text;
+  description: text;
+  category: text;
+  tags: vec text;
+  difficulty_level: DifficultyLevel;
+  estimated_duration_hours: nat32;
+  price: nat64;
+};
+
+type CreateLessonRequest = record {
+  course_id: text;
+  title: text;
+  description: text;
+  content_type: ContentType;
+  content_url: text;
+  duration_minutes: nat32;
+  prerequisites: vec text;
+  learning_objectives: vec text;
+};
+
+type DifficultyLevel = variant {
+  Beginner;
+  Intermediate;
+  Advanced;
+  Expert;
+};
+
+type Enrollment = record {
+  user_id: principal;
+  course_id: text;
+  enrolled_at: nat64;
+  progress: CourseProgress;
+  completion_percentage: float32;
+  last_accessed: nat64;
+};
+
+type Lesson = record {
+  id: text;
+  course_id: text;
+  title: text;
+  description: text;
+  content_type: ContentType;
+  content_url: text;
+  duration_minutes: nat32;
+  order_index: nat32;
+  prerequisites: vec text;
+  learning_objectives: vec text;
+  created_at: nat64;
+  updated_at: nat64;
+};
+
+type Result = variant {
+  Ok: Course;
+  Err: ApiError;
+};
+
+type Result_1 = variant {
+  Ok: Lesson;
+  Err: ApiError;
+};
+
+type Result_2 = variant {
+  Ok: Enrollment;
+  Err: ApiError;
+};
+
+type Review = record {
+  id: text;
+  user_id: principal;
+  rating: nat8;
+  comment: text;
+  created_at: nat64;
+  helpful_votes: nat32;
+};
+
+service : {
+  add_course_review: (text, nat8, text) -> (Result);
+  add_lesson: (CreateLessonRequest) -> (Result_1);
+  create_course: (CreateCourseRequest) -> (Result);
+  enroll_in_course: (text) -> (Result_2);
+  get_all_courses: () -> (vec Course) query;
+  get_course: (text) -> (Result) query;
+  get_course_lessons: (text) -> (vec Lesson) query;
+  get_instructor_courses: (principal) -> (vec Course) query;
+  get_lesson: (text) -> (Result_1) query;
+  get_popular_courses: (opt nat32) -> (vec Course) query;
+  get_published_courses: () -> (vec Course) query;
+  get_user_enrollment: (principal, text) -> (Result_2) query;
+  get_user_enrollments: (principal) -> (vec Enrollment) query;
+  mark_lesson_complete: (text, text) -> (Result_2);
+  publish_course: (text) -> (Result);
+  search_courses: (opt text, opt text, opt DifficultyLevel, opt nat32) -> (vec Course) query;
+  update_course: (text, opt text, opt text, opt text, opt vec text, opt DifficultyLevel, opt nat32, opt nat64) -> (Result);
+}

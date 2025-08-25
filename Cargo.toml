@@ -1,5 +1,21 @@
 [workspace]
-members = [
-    "src/decentralized_university_backend"
-]
 resolver = "2"
+members = [
+    "src/user_management",
+    "src/course_management",
+    "src/certification_system",
+    "src/governance",
+]
+
+[workspace.dependencies]
+ic-cdk = "0.13"
+ic-cdk-timers = "0.7"
+ic-stable-structures = "0.6"
+candid = "0.10"
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.10"
+rand = "0.8"
+chrono = { version = "0.4", features = ["serde"] }
+hex = "0.4"
+getrandom = { version = "0.2", features = ["js"] }
